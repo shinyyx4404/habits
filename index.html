@@ -48,6 +48,17 @@ label{display:block;font-size:14px;font-weight:700;margin:16px 0 7px}
 .sw.on{background:var(--g)}.sw:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.15s}.sw.on:after{left:21px}
 .pb{height:10px;border-radius:5px;background:var(--ln);margin-top:10px}.pb i{display:block;height:100%;border-radius:5px;background:var(--g)}
 .bk{font-size:30px;line-height:1}
+.strip{display:flex;gap:8px;overflow-x:auto;margin:14px -18px 0;padding:0 18px 4px}
+.sd{flex:none;width:52px;border:1px solid var(--ln);background:var(--c);color:var(--ink);border-radius:14px;padding:8px 0;font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px}
+.sd small{color:var(--mu);font-size:12px}.sd.on{background:var(--dk);color:#fff;border-color:var(--dk)}.sd.on small{color:#ffffffbb}
+.rg{animation:dr .9s ease-out}@keyframes dr{from{stroke-dasharray:0 100}}
+.bars i{animation:gr .6s ease-out}@keyframes gr{from{height:0}}
+.fx{animation:fin .25s}@keyframes fin{from{opacity:0;transform:translateY(8px)}}
+.ck{transition:background .15s}.ck:active{transform:scale(.85)}
+.pty{position:fixed;inset:0;z-index:9;pointer-events:none;overflow:hidden;animation:fade .4s 3.1s forwards}@keyframes fade{to{opacity:0}}
+.pty i{position:absolute;top:-16px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards}@keyframes fall{to{transform:translateY(105vh) rotate(var(--r))}}
+.pm{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);background:var(--c);border:1px solid var(--ln);border-radius:22px;padding:22px 28px;text-align:center;font-size:44px;box-shadow:0 12px 40px #0005;animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+.pm b{display:block;font-size:18px;color:var(--ink)}.pm span{font-size:14px;color:var(--mu)}@keyframes pop{from{transform:translate(-50%,-50%) scale(.3);opacity:0}}
 </style>
 </head>
 <body>
@@ -76,36 +87,41 @@ const tl=h=>h.tm==='at'&&h.t1?h.t1:h.tm==='range'&&h.t1&&h.t2?h.t1+' – '+h.t2:
 function strk(h){let run=0,best=0,t=TODAY();for(let d=h.date,i=0;d<=t&&i<1000;d=add(d,1),i++){const sc=h.type==='once'?d===h.date:h.type==='weekly'?h.days.includes(wd(d)):true;if(!sc)continue;if(done(h,d)){run++;best=Math.max(best,run)}else if(d!==t)run=0}return[run,best]}
 function dayst(s){let a=0,b=0;S.h.forEach(h=>{if(on(h,s)){a++;if(done(h,s))b++}});return[a,b]}
 function rng(ds){let a=0,b=0,t=TODAY();ds.forEach(s=>{if(s>t)return;const r=dayst(s);a+=r[0];b+=r[1]});return a?Math.round(b/a*100):0}
-const ring=(p,z,l)=>`<svg width="${z}" height="${z}" viewBox="0 0 36 36" style="flex:none"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--gl)" stroke-width="3.2"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--g)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="${p} 100" transform="rotate(-90 18 18)"/><text x="18" y="20.6" text-anchor="middle" font-size="7.5" font-weight="700" fill="currentColor">${l}</text></svg>`;
-const hrow=(h,s)=>{const c=cnt(h,s),dn=c>=h.goal;return`<div class="hab"><div class="ic" style="background:${h.color}26">${h.emoji}</div><div class="t" onclick="A('det','${h.id}')"><b>${esc(h.name)}</b><span>${h.goal>1?c+'/'+h.goal+' · ':''}${tl(h)}</span></div><button class="ck" style="border-color:${h.color};${dn?'background:'+h.color:''}" onclick="A('tick','${h.id}','${s}')">${dn?'✓':''}</button></div>`};
+const ring=(p,z,l)=>`<svg width="${z}" height="${z}" viewBox="0 0 36 36" style="flex:none"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--gl)" stroke-width="3.2"/><circle class="rg" cx="18" cy="18" r="15.9" fill="none" stroke="var(--g)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="${p} 100" transform="rotate(-90 18 18)"/><text x="18" y="20.6" text-anchor="middle" font-size="7.5" font-weight="700" fill="currentColor">${l}</text></svg>`;
+const hrow=(h,s)=>{const c=cnt(h,s),dn=c>=h.goal;return`<div class="hab"><div class="ic" style="background:${h.color}26">${h.emoji}</div><div class="t" onclick="A('det','${h.id}')"><b>${esc(h.name)}</b><span>${h.goal>1?c+'/'+h.goal+' · ':''}${tl(h)}</span></div><button class="ck" style="border-color:${h.color};${dn?'background:'+h.color:''}${s>TODAY()?';opacity:.35':''}" ${s>TODAY()?'disabled':`onclick="A('tick','${h.id}','${s}')"`}>${dn?'✓':''}</button></div>`};
 const bars=(a,l)=>`<div class="bars">${a.map((p,i)=>`<div><i style="height:${p}%"></i>${l[i]}</div>`).join('')}</div>`;
 const tgl=k=>`<button class="sw ${S.set[k]?'on':''}" onclick="S.set.${k}=S.set.${k}?0:1;sv();render()"></button>`;
-let view='home',hist=[],F={},V={tab:'w',off:0,cm:0,sel:TODAY(),at:'a',id:null};
-const go=v=>{hist.push(view);view=v;render();scrollTo(0,0)},nv=v=>{hist=[];view=v;render();scrollTo(0,0)},bk=()=>{view=hist.pop()||'home';render()};
+let view='home',hist=[],F={},fx=0,V={tab:'w',off:0,cm:0,sel:TODAY(),hd:TODAY(),at:'a',id:null};
+const go=v=>{hist.push(view);view=v;fx=1;render();scrollTo(0,0)},nv=v=>{hist=[];view=v;fx=1;if(v==='home')V.hd=TODAY();render();scrollTo(0,0)},bk=()=>{view=hist.pop()||'home';fx=1;render()};
 const newF=d=>({name:'',type:'daily',goal:1,days:[],date:d,tm:'none',t1:'',t2:'',emoji:EMO[0],color:COL[0]});
 function A(a,x,y){const h=S.h.find(q=>q.id===(V.id||x));
-if(a==='tick'){const q=S.h.find(z=>z.id===x),k=x+'_'+y,c=cnt(q,y);S.d[k]=c>=q.goal?0:c+1;sv();render()}
+if(a==='tick'){const q=S.h.find(z=>z.id===x),k=x+'_'+y,c=cnt(q,y),w=dayst(y);S.d[k]=c>=q.goal?0:c+1;sv();render();cel(y,w)}
 else if(a==='det'){V.id=x;go('det')}
 else if(a==='new'){F=newF(x||TODAY());go('add')}
 else if(a==='edit'){F=JSON.parse(JSON.stringify(h));go('add')}
-else if(a==='inc'){const t=TODAY();if(cnt(h,t)<h.goal)S.d[h.id+'_'+t]=cnt(h,t)+1;sv();render()}
-else if(a==='full'){const t=TODAY();S.d[h.id+'_'+t]=done(h,t)?0:h.goal;sv();render()}
+else if(a==='inc'){const t=TODAY(),w=dayst(t);if(cnt(h,t)<h.goal)S.d[h.id+'_'+t]=cnt(h,t)+1;sv();render();cel(t,w)}
+else if(a==='full'){const t=TODAY(),w=dayst(t);S.d[h.id+'_'+t]=done(h,t)?0:h.goal;sv();render();cel(t,w)}
 else if(a==='save'){if(!F.name.trim()){$('#fn').focus();return}
 const o={...F,name:F.name.trim()};if(o.type==='weekly'&&!o.days.length)o.days=[wd(o.date)];if(o.tm==='none')o.t1=o.t2='';if(o.tm==='at')o.t2='';if(o.type!=='count'&&o.type!=='daily'&&o.type!=='weekly'&&o.type!=='once')o.type='daily';
 if(o.id)S.h=S.h.map(q=>q.id===o.id?o:q);else{o.id=Date.now().toString(36);S.h.push(o)}
 V.sel=o.date;sv();bk()}
 else if(a==='arch'){const q=S.h.find(z=>z.id===F.id);q.arch=!q.arch;sv();hist=[];view='all';render()}
 else if(a==='del'){if(confirm('Удалить привычку?')){S.h=S.h.filter(q=>q.id!==F.id);Object.keys(S.d).forEach(k=>{if(k.startsWith(F.id+'_'))delete S.d[k]});sv();hist=[];view='all';render()}}}
+const cel=(s,w)=>{const n=dayst(s);if(n[0]&&n[1]===n[0]&&w[1]<w[0])setTimeout(party,120)};
+function party(){const c=document.createElement('div'),C=['#3B82F6','#2F9E6B','#8B5CF6','#F59E0B','#EF4444','#EC4899'];c.className='pty';let h='<div class="pm">🎉<b>День выполнен на 100%!</b><span>Отличная работа</span></div>';
+for(let i=0;i<60;i++)h+=`<i style="left:${Math.random()*100}%;background:${C[i%6]};animation-delay:${Math.random()*.6}s;animation-duration:${1.8+Math.random()*1.4}s;--r:${Math.round(Math.random()*720-360)}deg"></i>`;
+c.innerHTML=h;document.body.appendChild(c);setTimeout(()=>c.remove(),3600)}
 const nav=()=>{const I={home:'<path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/>',stats:'<path d="M5 20V10M12 20V4M19 20v-7"/>',cal:'<path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/>',me:'<path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 4-6 8-6s8 2 8 6"/>'};
 const N=[['home','Главная'],['stats','Статистика'],['cal','Календарь'],['me','Профиль']],cur=view==='all'?'home':view;
 return`<div class="nav"><div>${N.map(([k,n])=>`<button class="${cur===k?'on':''}" onclick="nv('${k}')"><svg viewBox="0 0 24 24">${I[k]}</svg>${n}</button>`).join('')}</div></div>`};
 const hd=(t,r)=>`<div class="row sp" style="margin-bottom:6px"><div class="row"><a class="bk" onclick="bk()">‹</a>${t?`<h1 style="margin:0;font-size:22px">${t}</h1>`:''}</div>${r||''}</div>`;
 const VW={
-home(){const t=TODAY(),L=S.h.filter(h=>on(h,t)).sort(byT),a=L.length,b=L.filter(h=>done(h,t)).length,p=a?Math.round(b/a*100):0;
+home(){const T0=TODAY();if(V.hd<T0)V.hd=T0;const t=V.hd,L=S.h.filter(h=>on(h,t)).sort(byT),a=L.length,b=L.filter(h=>done(h,t)).length,p=a?Math.round(b/a*100):0;
 return`<div class="row sp"><div><h1>Привет, друг!</h1><div class="mu">Сегодня отличный день<br>чтобы стать лучше</div></div><div style="font-size:48px">🦔</div></div>
-<div class="card row" style="margin-top:16px;gap:16px">${ring(p,84,b+'/'+a)}<div><b>Твой прогресс сегодня</b><div class="mu" style="margin-top:4px">${!a?'Добавь первую привычку':p===100?'Все привычки выполнены!':'Ты уже молодец! Осталось совсем немного до 100%'}</div></div></div>
-<div class="row sp"><h2>Привычки на сегодня</h2><a class="mu" onclick="go('all')">Все ›</a></div>${L.map(h=>hrow(h,t)).join('')||'<div class="mu" style="padding:12px 0">На сегодня привычек нет</div>'}
-<button class="btn" onclick="A('new')">+ Добавить привычку</button>`},
+<div class="strip">${dr(T0,add(T0,13)).map(s=>`<button class="sd ${s===t?'on':''}" onclick="V.hd='${s}';render()"><small>${DW[wd(s)]}</small><b>${+s.slice(8)}</b></button>`).join('')}</div>
+<div class="card row" style="margin-top:14px;gap:16px">${ring(p,84,b+'/'+a)}<div><b>${t===T0?'Твой прогресс сегодня':'Прогресс на '+fmt(t,{day:'numeric',month:'long'})}</b><div class="mu" style="margin-top:4px">${t>T0?(a?'Запланировано привычек: '+a:'На этот день ничего не запланировано'):!a?'Добавь первую привычку':p===100?'Все привычки выполнены!':'Ты уже молодец! Осталось совсем немного до 100%'}</div></div></div>
+<div class="row sp"><h2>${t===T0?'Привычки на сегодня':t===add(T0,1)?'Привычки на завтра':'Привычки на '+fmt(t,{day:'numeric',month:'long'})}</h2><a class="mu" onclick="go('all')">Все ›</a></div>${L.map(h=>hrow(h,t)).join('')||'<div class="mu" style="padding:12px 0">На этот день привычек нет</div>'}
+<button class="btn" onclick="A('new','${t}')">+ Добавить привычку</button>`},
 add(){const q=(k,v)=>`F.${k}='${v}';render()`;
 return`${hd('')}<h1>${F.id?'Изменить':'Добавить'} привычку</h1><div class="mu">Укажи название привычки и настрой ее</div>
 <label>Название привычки</label><input id="fn" value="${esc(F.name)}" placeholder="Например: Пить воду" oninput="F.name=this.value">
@@ -155,7 +171,7 @@ return`${hd('Настройки')}<h2>Уведомления</h2><div class="car
 <h2>Внешний вид</h2><div class="card" style="padding:0 14px"><div class="lr" onclick="S.set.th=TH[(TH.findIndex(x=>x[0]===S.set.th)+1)%3][0];sv();render()">Тема<span class="mu">${th[1]} ›</span></div><div class="lr" onclick="S.set.sz=S.set.sz?0:1;sv();render()">Размер текста<span class="mu">${S.set.sz?'Крупный':'Обычный'} ›</span></div></div>
 <h2>Другое</h2><div class="card" style="padding:0 14px"><div class="lr" onclick="navigator.clipboard.writeText(JSON.stringify(S)).then(()=>alert('Данные скопированы в буфер обмена'),()=>alert('Не удалось скопировать'))">Экспорт данных<span>›</span></div><div class="lr" onclick="if(confirm('Сбросить весь прогресс?')){S.d={};sv();render()}">Сбросить прогресс<span>›</span></div></div>`}};
 function render(){document.documentElement.dataset.theme=S.set.th==='auto'?(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):S.set.th;document.body.style.zoom=S.set.sz?1.15:1;
-$('#app').innerHTML=VW[view]()+(['add','det','set'].includes(view)?'':nav())}
+$('#app').className=fx?'fx':'';fx=0;$('#app').innerHTML=VW[view]()+(['add','det','set'].includes(view)?'':nav())}
 render();
 </script>
 </body>

@@ -23,7 +23,13 @@ jobs:
           npm install @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
           npx cap init Habits com.habits.app --web-dir www
           npx cap add android
-          npx cap sync android
+      - name: Icon
+        continue-on-error: true
+        run: |
+          npm install --save-dev @capacitor/assets@3
+          npx capacitor-assets generate --android --iconBackgroundColor '#2F9E6B' --iconBackgroundColorDark '#2F9E6B'
+      - name: Sync
+        run: npx cap sync android
       - name: Build
         run: cd android && chmod +x gradlew && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4

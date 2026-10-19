@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2F4F8">
+<title>Привычки</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F2F4F8;--card:#fff;--ink:#1B2233;--mute:#6B7488;--line:#E1E5EE;--accent:#3D5AFE}
+@media(prefers-color-scheme:dark){:root{--bg:#12151D;--card:#1C212D;--ink:#EEF1F8;--mute:#9099AE;--line:#2A3142;--accent:#7C8FFF}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif}
+body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:720px;margin:0 auto;padding:16px 16px 120px}
+h1{font-size:26px;font-weight:800;margin:8px 0 2px}
+.sub{color:var(--mute);font-size:15px;margin-bottom:14px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:18px}
+.day{border:0;background:var(--card);color:var(--ink);border-radius:14px;padding:8px 0;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.day small{color:var(--mute);font-size:12px}.day b{font-size:17px}
+.day.sel{background:var(--accent);color:#fff}.day.sel small{color:#ffffffcc}
+.nav{display:flex;gap:8px;margin-bottom:10px}
+.nav button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:8px;font:inherit;font-weight:700;cursor:pointer}
+.item{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:12px;margin-bottom:10px;border-left:6px solid var(--c)}
+.em{width:46px;height:46px;border-radius:14px;background:color-mix(in srgb,var(--c) 22%,transparent);display:grid;place-items:center;font-size:26px;flex:none}
+.txt{flex:1;min-width:0;cursor:pointer}
+.txt b{display:block;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.txt span{color:var(--mute);font-size:14px}
+.item.done .txt b{text-decoration:line-through;opacity:.5}
+.chk{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--c);background:transparent;color:#fff;font-size:18px;cursor:pointer;flex:none}
+.item.done .chk{background:var(--c)}
+.empty{text-align:center;color:var(--mute);padding:40px 10px}
+.fab{position:fixed;right:max(20px,calc(50% - 340px));bottom:calc(24px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:32px;box-shadow:0 6px 18px #0004;cursor:pointer}
+.ov{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;justify-content:center}
+.ov.on{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom))}
+@media(min-width:700px){.ov{align-items:center}.sheet{border-radius:24px}}
+.sheet h2{margin:0 0 14px;font-size:21px}
+label{display:block;font-size:14px;font-weight:700;color:var(--mute);margin:14px 0 6px}
+input[type=text],input[type=date],input[type=time]{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
+.row{display:flex;gap:8px;align-items:center}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;padding:10px 4px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.emos,.cols{display:flex;flex-wrap:wrap;gap:8px}
+.emos button{width:44px;height:44px;border-radius:12px;border:2px solid transparent;background:var(--bg);font-size:24px;cursor:pointer}
+.emos button.on{border-color:var(--accent)}
+.cols button{width:36px;height:36px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+.cols button.on{border-color:var(--ink)}
+.rep{display:flex;align-items:center;gap:10px;margin-top:16px;font-weight:700}
+.rep input{width:22px;height:22px}
+.acts{display:flex;gap:10px;margin-top:22px}
+.acts button{flex:1;padding:14px;border-radius:14px;border:0;font:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.save{background:var(--accent);color:#fff}.cancel{background:var(--bg);color:var(--ink)}.del{background:#E5484D;color:#fff;flex:0 0 auto!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Привычки</h1>
+  <div class="sub" id="sub"></div>
+  <div class="nav"><button id="prev">‹ Неделя</button><button id="today">Сегодня</button><button id="next">Неделя ›</button></div>
+  <div class="week" id="week"></div>
+  <div id="list"></div>
+</div>
+<button class="fab" id="add" aria-label="Новая привычка">+</button>
+
+<div class="ov" id="ov"><div class="sheet">
+  <h2 id="ttl">Новая привычка</h2>
+  <label>Название</label><input type="text" id="name" placeholder="Например, выпить воду">
+  <label>Смайлик</label><div class="emos" id="emos"></div>
+  <label>Цвет</label><div class="cols" id="cols"></div>
+  <label>День</label><input type="date" id="date">
+  <label>Время</label>
+  <div class="seg" id="tm"><button data-m="none">Без времени</button><button data-m="at">Во сколько</button><button data-m="range">Период</button></div>
+  <div class="row" id="times" style="margin-top:10px"><input type="time" id="t1"><span id="dash">–</span><input type="time" id="t2"></div>
+  <div class="rep"><input type="checkbox" id="rep"><label for="rep" style="margin:0;color:var(--ink)">Повторять каждый день</label></div>
+  <div class="acts"><button class="del" id="del">Удалить</button><button class="cancel" id="cancel">Отмена</button><button class="save" id="save">Сохранить</button></div>
+</div></div>
+
+<script>
+const EMO=['💧','🏃','📖','🧘','💊','🥗','😴','🧹','💪','🎸','✍️','🪥','🚶','☀️','🍎','🧠','📞','🌱','🛁','🐶'];
+const COL=['#E5484D','#F76B15','#F5B800','#30A46C','#12A594','#3D5AFE','#8E4EC6','#E93D82','#6B7488'];
+const DN=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+const $=id=>document.getElementById(id);
+const load=()=>{try{return JSON.parse(localStorage.getItem('habits-v1'))||{h:[],d:{}}}catch(e){return{h:[],d:{}}}};
+let S=load();
+const save=()=>{try{localStorage.setItem('habits-v1',JSON.stringify(S))}catch(e){}};
+const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
+const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+let sel=iso(new Date()),edit=null,form={};
+
+function monday(s){const d=parse(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
+function shift(n){const d=parse(sel);d.setDate(d.getDate()+n);sel=iso(d);render()}
+function onDay(h,s){return h.repeat?s>=h.date:h.date===s}
+function tlabel(h){return h.tm==='at'&&h.t1?h.t1:h.tm==='range'&&h.t1&&h.t2?h.t1+' – '+h.t2:'В течение дня'}
+
+function render(){
+  const m=monday(sel),w=$('week');w.innerHTML='';
+  for(let i=0;i<7;i++){const d=new Date(m);d.setDate(m.getDate()+i);const s=iso(d);
+    const b=document.createElement('button');b.className='day'+(s===sel?' sel':'');
+    b.innerHTML='<small>'+DN[d.getDay()]+'</small><b>'+d.getDate()+'</b>';
+    b.onclick=()=>{sel=s;render()};w.appendChild(b)}
+  $('sub').textContent=parse(sel).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  const hs=S.h.filter(h=>onDay(h,sel)).sort((a,b)=>(a.tm==='none')-(b.tm==='none')||(a.t1||'').localeCompare(b.t1||''));
+  const L=$('list');L.innerHTML='';
+  if(!hs.length){L.innerHTML='<div class="empty">На этот день привычек нет.<br>Нажмите +, чтобы добавить.</div>';return}
+  hs.forEach(h=>{const k=h.id+'_'+sel,done=!!S.d[k];
+    const e=document.createElement('div');e.className='item'+(done?' done':'');e.style.setProperty('--c',h.color);
+    e.innerHTML='<div class="em">'+h.emoji+'</div><div class="txt"><b></b><span>'+tlabel(h)+(h.repeat?' · каждый день':'')+'</span></div><button class="chk">'+(done?'✓':'')+'</button>';
+    e.querySelector('b').textContent=h.name;
+    e.querySelector('.chk').onclick=()=>{if(S.d[k])delete S.d[k];else S.d[k]=1;save();render()};
+    e.querySelector('.txt').onclick=()=>open(h);
+    L.appendChild(e)})}
+
+function paint(){
+  $('emos').innerHTML='';EMO.forEach(x=>{const b=document.createElement('button');b.textContent=x;b.className=form.emoji===x?'on':'';b.onclick=()=>{form.emoji=x;paint()};$('emos').appendChild(b)});
+  $('cols').innerHTML='';COL.forEach(c=>{const b=document.createElement('button');b.style.background=c;b.className=form.color===c?'on':'';b.onclick=()=>{form.color=c;paint()};$('cols').appendChild(b)});
+  document.querySelectorAll('#tm button').forEach(b=>b.className=b.dataset.m===form.tm?'on':'');
+  $('times').style.display=form.tm==='none'?'none':'flex';
+  $('t2').style.display=$('dash').style.display=form.tm==='range'?'':'none';
+}
+function open(h){
+  edit=h||null;
+  form=h?{...h}:{emoji:EMO[0],color:COL[5],tm:'none',t1:'',t2:''};
+  $('ttl').textContent=h?'Изменить привычку':'Новая привычка';
+  $('name').value=h?h.name:'';$('date').value=h?h.date:sel;
+  $('t1').value=form.t1||'';$('t2').value=form.t2||'';$('rep').checked=!!(h&&h.repeat);
+  $('del').style.display=h?'':'none';
+  paint();$('ov').classList.add('on');
+}
+const close=()=>$('ov').classList.remove('on');
+document.querySelectorAll('#tm button').forEach(b=>b.onclick=()=>{form.tm=b.dataset.m;paint()});
+$('add').onclick=()=>open();$('cancel').onclick=close;
+$('ov').onclick=e=>{if(e.target===$('ov'))close()};
+$('save').onclick=()=>{
+  const name=$('name').value.trim();if(!name){$('name').focus();return}
+  const h={id:edit?edit.id:Date.now().toString(36),name,emoji:form.emoji,color:form.color,date:$('date').value||sel,tm:form.tm,t1:$('t1').value,t2:form.tm==='range'?$('t2').value:'',repeat:$('rep').checked};
+  if(edit)S.h=S.h.map(x=>x.id===edit.id?h:x);else S.h.push(h);
+  sel=h.date;save();close();render()};
+$('del').onclick=()=>{if(confirm('Удалить привычку?')){S.h=S.h.filter(x=>x.id!==edit.id);save();close();render()}};
+$('prev').onclick=()=>shift(-7);$('next').onclick=()=>shift(7);
+$('today').onclick=()=>{sel=iso(new Date());render()};
+render();
+</script>
+</body>
+</html>

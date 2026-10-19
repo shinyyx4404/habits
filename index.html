@@ -52,6 +52,7 @@ label{display:block;font-size:14px;font-weight:700;margin:16px 0 7px}
 </head>
 <body>
 <div id="app"></div>
+<script>window.onerror=function(m,u,l){document.body.innerHTML='<pre style="padding:24px;white-space:pre-wrap;color:#c00">'+m+' ('+l+')</pre>'}</script>
 <script>
 const $=s=>document.querySelector(s);
 const DW=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],MN=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
@@ -98,7 +99,7 @@ else if(a==='del'){if(confirm('Удалить привычку?')){S.h=S.h.filte
 const nav=()=>{const I={home:'<path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/>',stats:'<path d="M5 20V10M12 20V4M19 20v-7"/>',cal:'<path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/>',me:'<path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 4-6 8-6s8 2 8 6"/>'};
 const N=[['home','Главная'],['stats','Статистика'],['cal','Календарь'],['me','Профиль']],cur=view==='all'?'home':view;
 return`<div class="nav"><div>${N.map(([k,n])=>`<button class="${cur===k?'on':''}" onclick="nv('${k}')"><svg viewBox="0 0 24 24">${I[k]}</svg>${n}</button>`).join('')}</div></div>`};
-const top=(t,r)=>`<div class="row sp" style="margin-bottom:6px"><div class="row"><a class="bk" onclick="bk()">‹</a>${t?`<h1 style="margin:0;font-size:22px">${t}</h1>`:''}</div>${r||''}</div>`;
+const hd=(t,r)=>`<div class="row sp" style="margin-bottom:6px"><div class="row"><a class="bk" onclick="bk()">‹</a>${t?`<h1 style="margin:0;font-size:22px">${t}</h1>`:''}</div>${r||''}</div>`;
 const VW={
 home(){const t=TODAY(),L=S.h.filter(h=>on(h,t)).sort(byT),a=L.length,b=L.filter(h=>done(h,t)).length,p=a?Math.round(b/a*100):0;
 return`<div class="row sp"><div><h1>Привет, друг!</h1><div class="mu">Сегодня отличный день<br>чтобы стать лучше</div></div><div style="font-size:48px">🦔</div></div>
@@ -106,7 +107,7 @@ return`<div class="row sp"><div><h1>Привет, друг!</h1><div class="mu">
 <div class="row sp"><h2>Привычки на сегодня</h2><a class="mu" onclick="go('all')">Все ›</a></div>${L.map(h=>hrow(h,t)).join('')||'<div class="mu" style="padding:12px 0">На сегодня привычек нет</div>'}
 <button class="btn" onclick="A('new')">+ Добавить привычку</button>`},
 add(){const q=(k,v)=>`F.${k}='${v}';render()`;
-return`${top('')}<h1>${F.id?'Изменить':'Добавить'} привычку</h1><div class="mu">Укажи название привычки и настрой ее</div>
+return`${hd('')}<h1>${F.id?'Изменить':'Добавить'} привычку</h1><div class="mu">Укажи название привычки и настрой ее</div>
 <label>Название привычки</label><input id="fn" value="${esc(F.name)}" placeholder="Например: Пить воду" oninput="F.name=this.value">
 <label>Смайлик</label><div class="chips">${EMO.map(e=>`<button class="${F.emoji===e?'on':''}" onclick="${q('emoji',e)}">${e}</button>`).join('')}</div>
 <label>Цвет</label><div class="chips">${COL.map(c=>`<button class="col ${F.color===c?'on':''}" style="background:${c}" onclick="${q('color',c)}"></button>`).join('')}</div>
@@ -135,10 +136,10 @@ return`<h1>Календарь</h1><div class="row sp" style="font-size:18px;font
 <h2>${fmt(V.sel,{day:'numeric',month:'long'})}</h2>${L.map(h=>hrow(h,V.sel)).join('')||'<div class="mu">На этот день привычек нет</div>'}
 <button class="btn" onclick="A('new','${V.sel}')">+ Добавить на этот день</button>`},
 all(){const L=S.h.filter(h=>!!h.arch===(V.at==='r'));
-return`${top('Все привычки',`<a class="bk" onclick="A('new')">+</a>`)}<div class="seg">${[['a','Активные'],['r','Архив']].map(([k,n])=>`<button class="${V.at===k?'on':''}" onclick="V.at='${k}';render()">${n}</button>`).join('')}</div>
+return`${hd('Все привычки',`<a class="bk" onclick="A('new')">+</a>`)}<div class="seg">${[['a','Активные'],['r','Архив']].map(([k,n])=>`<button class="${V.at===k?'on':''}" onclick="V.at='${k}';render()">${n}</button>`).join('')}</div>
 ${L.map(h=>`<div class="hab" onclick="A('det','${h.id}')"><div class="ic" style="background:${h.color}26">${h.emoji}</div><div class="t"><b>${esc(h.name)}${h.goal>1?' ('+h.goal+')':''}</b><span>Серия: ${strk(h)[0]} дн.</span></div><span>›</span></div>`).join('')||'<div class="mu" style="padding:12px 0">Здесь пока пусто</div>'}`},
 det(){const h=S.h.find(x=>x.id===V.id);if(!h){view='home';return VW.home()}const t=TODAY(),c=cnt(h,t),[r,b]=strk(h),w=dr(add(t,-6),t);
-return`${top('',`<a class="bk" onclick="A('edit')">⋯</a>`)}<div style="text-align:center"><div class="ic" style="width:84px;height:84px;font-size:42px;border-radius:50%;margin:0 auto 10px;background:${h.color}26">${h.emoji}</div><h1>${esc(h.name)}</h1><div class="mu">${h.goal} раз в день · ${tl(h)}</div></div>
+return`${hd('',`<a class="bk" onclick="A('edit')">⋯</a>`)}<div style="text-align:center"><div class="ic" style="width:84px;height:84px;font-size:42px;border-radius:50%;margin:0 auto 10px;background:${h.color}26">${h.emoji}</div><h1>${esc(h.name)}</h1><div class="mu">${h.goal} раз в день · ${tl(h)}</div></div>
 <div class="card" style="margin-top:16px"><div class="row sp"><b>Сегодня</b><b>${c}/${h.goal}</b></div><div class="pb"><i style="width:${Math.min(100,c/h.goal*100)}%;background:${h.color}"></i></div></div>
 ${on(h,t)?`${h.goal>1?`<button class="btn" onclick="A('inc')">+ Добавить</button>`:''}<button class="btn l" onclick="A('full')">${done(h,t)?'Снять отметку':'Отметить как выполненную'}</button>`:'<div class="mu" style="margin-top:12px">Сегодня эта привычка не запланирована</div>'}
 <h2>История</h2><div class="row"><div class="card" style="flex:1">🔥 <b>${r} дн.</b><div class="mu">Текущая серия</div></div><div class="card" style="flex:1">🏆 <b>${b} дн.</b><div class="mu">Личный рекорд</div></div></div>
@@ -150,7 +151,7 @@ return`<div class="row sp"><h1>Профиль</h1><a class="bk" onclick="go('set
 <div class="card row sp" style="text-align:center">${[[Math.max(0,...hs.map(h=>strk(h)[0])),'Дней в серии'],[n,'Выполнено раз'],[rng(dr(mn,TODAY()))+'%','Общий прогресс']].map(([a,b])=>`<div style="flex:1"><b style="font-size:20px">${a}</b><div class="mu">${b}</div></div>`).join('')}</div>
 <div class="card" style="margin-top:14px;padding:0 14px">${R('Мои привычки','Все привычки',"go('all')")}${R('Уведомления','Напоминания о привычках',"go('set')")}${R('Оформление','Тема и размер текста',"go('set')")}${R('Поддержка','FAQ и помощь',"alert('Приложение работает офлайн, данные хранятся на этом устройстве.')")}${R('О приложении','Версия 1.0.0',"alert('Привычки 1.0.0')")}</div>`},
 set(){const th=TH.find(x=>x[0]===S.set.th)||TH[0];
-return`${top('Настройки')}<h2>Уведомления</h2><div class="card" style="padding:0 14px">${[['n','Напоминания о привычках'],['r','Ежедневный отчет'],['m','Мотивационные сообщения']].map(([k,n])=>`<div class="lr">${n}${tgl(k)}</div>`).join('')}</div>
+return`${hd('Настройки')}<h2>Уведомления</h2><div class="card" style="padding:0 14px">${[['n','Напоминания о привычках'],['r','Ежедневный отчет'],['m','Мотивационные сообщения']].map(([k,n])=>`<div class="lr">${n}${tgl(k)}</div>`).join('')}</div>
 <h2>Внешний вид</h2><div class="card" style="padding:0 14px"><div class="lr" onclick="S.set.th=TH[(TH.findIndex(x=>x[0]===S.set.th)+1)%3][0];sv();render()">Тема<span class="mu">${th[1]} ›</span></div><div class="lr" onclick="S.set.sz=S.set.sz?0:1;sv();render()">Размер текста<span class="mu">${S.set.sz?'Крупный':'Обычный'} ›</span></div></div>
 <h2>Другое</h2><div class="card" style="padding:0 14px"><div class="lr" onclick="navigator.clipboard.writeText(JSON.stringify(S)).then(()=>alert('Данные скопированы в буфер обмена'),()=>alert('Не удалось скопировать'))">Экспорт данных<span>›</span></div><div class="lr" onclick="if(confirm('Сбросить весь прогресс?')){S.d={};sv();render()}">Сбросить прогресс<span>›</span></div></div>`}};
 function render(){document.documentElement.dataset.theme=S.set.th==='auto'?(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):S.set.th;document.body.style.zoom=S.set.sz?1.15:1;
